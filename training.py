@@ -13,8 +13,6 @@ from consts import *
 
 if __name__=="__main__":
   #using same training setup as described in LIMA paper (https://arxiv.org/pdf/2305.11206.pdf)
-  
-
   torch.manual_seed(DEFAULT_SEED)
   model = BloomModel.from_pretrained(PRETRAINED_MODEL)
   #using low rank adaptation (lora) implementation from https://github.com/huggingface/peft
