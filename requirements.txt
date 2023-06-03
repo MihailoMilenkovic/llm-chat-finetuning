@@ -1,4 +1,5 @@
 torch
+datasets
+evaluate
 transformers
 xformers
-datasets
