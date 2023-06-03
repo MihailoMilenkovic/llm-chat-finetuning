@@ -22,6 +22,15 @@ DEFAULT_TRAINING_DATASET = TRAINING_DATASETS[0]
 DEFAULT_SEED=42
 MODEL_DIR="saved_models"
 
+training_params={
+    "num_epochs":15,
+    "start_learning_rate":1e-5,
+    "end_learning_rate":1e-6,
+    "beta1":0.9,
+    "beta2":0.95,
+    "weight_decay":0.1,
+    "batch_size":64 #using smaller model and larger batch size
+}
 
 INTRO_BLURB = (
     "Below is an instruction that describes a task. Write a response that appropriately completes the request."

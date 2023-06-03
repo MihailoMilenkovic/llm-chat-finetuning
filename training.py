@@ -12,13 +12,7 @@ from consts import *
 
 if __name__=="__main__":
   #using same training setup as described in LIMA paper (https://arxiv.org/pdf/2305.11206.pdf)
-  num_epochs=15
-  start_learning_rate=1e-5
-  end_learning_rate=1e-6
-  beta1=0.9
-  beta2=0.95
-  weight_decay=0.1
-  batch_size=64 #using smaller model and larger batch size
+  
 
   torch.manual_seed(DEFAULT_SEED)
   model = BloomModel.from_pretrained(PRETRAINED_MODEL)
@@ -27,16 +21,21 @@ if __name__=="__main__":
 
   train_dataset = get_preprocessed_dataset("train")
   eval_dataset = get_preprocessed_dataset("val")
-  train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
-  eval_dataloader = DataLoader(eval_dataset, batch_size=batch_size)
+  train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=training_params["batch_size"])
+  eval_dataloader = DataLoader(eval_dataset, batch_size=training_params["batch_size"])
   
 
-  num_training_steps = num_epochs * len(train_dataloader)
-  optimizer = AdamW(model.parameters(),lr=start_learning_rate,betas=(beta1,beta2),weight_decay=0.1)
-  lr_scheduler = LinearLR(optimizer, start_factor=1,end_factor=end_learning_rate/start_learning_rate, total_iters=num_training_steps)
+  num_training_steps = training_params["num_epochs"] * len(train_dataloader)
+  optimizer = AdamW(
+    model.parameters(),
+    lr=training_params["start_learning_rate"],
+    betas=(training_params["beta_1"],training_params["beta_2"]),
+    weight_decay=0.1
+  )
+  lr_scheduler = LinearLR(optimizer, start_factor=1,end_factor=training_params["end_learning_rate"]/training_params["start_learning_rate"], total_iters=num_training_steps)
   progress_bar = tqdm(range(num_training_steps))
   accuracy_metric = evaluate.load("accuracy")
-  for epoch_num in range(num_epochs):
+  for epoch_num in range(training_params["num_epochs"]):
     model.train()
     for batch in train_dataloader:
       batch = {k: v.to(device) for k, v in batch.items()}
