@@ -29,7 +29,7 @@ if __name__=="__main__":
   eval_dataset = get_preprocessed_dataset("val")
   train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
   eval_dataloader = DataLoader(eval_dataset, batch_size=batch_size)
-  out_dir="saved_models"
+  
 
   num_training_steps = num_epochs * len(train_dataloader)
   optimizer = AdamW(model.parameters(),lr=start_learning_rate,betas=(beta1,beta2),weight_decay=0.1)
@@ -61,17 +61,16 @@ if __name__=="__main__":
       accuracy_metric.add_batch(predictions=predictions, references=batch["labels"])
 
     val_accuracy=accuracy_metric.compute()
-    #checkpoint model after every 5 epochs
 
+    #checkpoint model after every 5 epochs
     if epoch_num%5==0:
       checkpoint = {
         'model': model.state_dict(),
         'optimizer': optimizer.state_dict(),
-        # 'model_args': model_args,
         'epoch_num': epoch_num,
         'val_accuracy': val_accuracy,
       }
-      print(f"saving checkpoint to {out_dir}")
-      torch.save(checkpoint, os.path.join(out_dir, f'ckpt_epoch_{epoch_num}.pt'))
+      print(f"saving checkpoint to {MODEL_DIR}")
+      torch.save(checkpoint, os.path.join(MODEL_DIR, f'ckpt_epoch_{epoch_num}.pt'))
     
   

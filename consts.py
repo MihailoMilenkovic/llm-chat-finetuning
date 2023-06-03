@@ -20,3 +20,47 @@ TRAINING_DATASETS = [
 DEFAULT_TRAINING_DATASET = TRAINING_DATASETS[0]
 
 DEFAULT_SEED=42
+MODEL_DIR="saved_models"
+
+
+INTRO_BLURB = (
+    "Below is an instruction that describes a task. Write a response that appropriately completes the request."
+)
+INSTRUCTION_KEY = "### Instruction:"
+RESPONSE_KEY = "### Response:"
+END_KEY = "### End"
+
+#(instruction,response) pairs will be repeated for the duration of the conversation
+PROMPT_FORMAT = """{intro}
+
+{context}
+
+{instruction_key}
+{instruction}
+
+{response_key}
+{response}
+
+{end_key}""".format(
+    intro=INTRO_BLURB,
+    context="{context}",
+    instruction_key=INSTRUCTION_KEY,
+    instruction="{instruction}",
+    response_key=RESPONSE_KEY,
+    response="{response}",
+    end_key=END_KEY,
+)
+PROMPT_FORMAT_BEFORE_RESPONSE = """{intro}
+
+{context}
+
+{instruction_key}
+{instruction}
+
+{response_key}""".format(
+    intro=INTRO_BLURB,
+    context="{context}",
+    instruction_key=INSTRUCTION_KEY,
+    instruction="{instruction}",
+    response_key=RESPONSE_KEY,
+)

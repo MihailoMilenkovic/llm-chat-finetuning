@@ -4,38 +4,32 @@ import numpy as np
 
 from consts import *
 
-INTRO_BLURB = (
-    "Below is an instruction that describes a task. Write a response that appropriately completes the request."
-)
-INSTRUCTION_KEY = "### Instruction:"
-RESPONSE_KEY = "### Response:"
-END_KEY = "### End"
-
-#(instruction,response) pairs will be repeated for the duration of the conversation
-PROMPT_FORMAT = """{intro}
-
-{context}
-
-{instruction_key}
-{instruction}
-
-{response_key}
-{response}
-
-{end_key}""".format(
-    intro=INTRO_BLURB,
-    context="{context}",
-    instruction_key=INSTRUCTION_KEY,
-    instruction="{instruction}",
-    response_key=RESPONSE_KEY,
-    response="{response}",
-    end_key=END_KEY,
-)
 def append_to_context_above(prev_context,role,message):
   new_context="""
     {new_key}
     {new_utterance}
     {prev_context}
+  """.format(
+      new_key="{new_key}",
+      new_utterance="{new_utterance}",
+      prev_context=prev_context)
+  if role=="assistant":
+    new_context=new_context.format(
+      new_key=RESPONSE_KEY,
+      new_utterance=message
+    )
+  else:
+    new_context=new_context.format(
+      new_key=INSTRUCTION_KEY,
+      new_utterance=message
+    )
+  return new_context
+
+def append_to_context_below(prev_context,role,message):
+  new_context="""
+    {prev_context}
+    {new_key}
+    {new_utterance}
   """.format(
       new_key="{new_key}",
       new_utterance="{new_utterance}",
