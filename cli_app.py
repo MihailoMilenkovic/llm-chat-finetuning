@@ -1,7 +1,6 @@
 from inference import generate_response
 
 if __name__=="__main__":
-    print("Welcome to scuffed chatGPT.")
     context=""
     while(True):
       print("Prompt:")
