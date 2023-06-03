@@ -118,8 +118,8 @@ def get_tokenized_dataset(conversation_chains,tokenizer):
   tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL)
   def tokenize_function(examples):
     return tokenizer(examples["text"], padding="max_length", truncation=True)
+  #TODO: check if some sort of end of turn tokens should be added after assistant response or something similar 
   tokenized_dataset = conversation_dataset.map(tokenize_function, batched=True)
-  #TODO: convert to (x,y) samples 
   return tokenized_dataset
 
 def preprocess_dataset(dataset):
