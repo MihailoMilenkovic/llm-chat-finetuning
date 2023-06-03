@@ -3,8 +3,9 @@ import torch
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import LinearLR
 from torch.utils.data import DataLoader
-from tqdm.auto import tqdm
 import evaluate
+from peft import get_peft_model, LoraConfig, TaskType
+from tqdm.auto import tqdm
 import os
 
 from data_preprocessing import get_preprocessed_dataset
@@ -16,6 +17,14 @@ if __name__=="__main__":
 
   torch.manual_seed(DEFAULT_SEED)
   model = BloomModel.from_pretrained(PRETRAINED_MODEL)
+  #using low rank adaptation (lora) implementation from https://github.com/huggingface/peft
+  #training bloom 7b on 1 A100 GPU should work (32GB GPU memory needed)
+  peft_config = LoraConfig(
+    task_type=TaskType.SEQ_2_SEQ_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1
+  )
+  model=get_peft_model(model,peft_config)
+
+
   device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
   model.to(device)
 
