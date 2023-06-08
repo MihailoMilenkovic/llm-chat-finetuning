@@ -1,4 +1,4 @@
-PRETRAINED_MODELS = [
+SUGGESTED_INPUT_MODELS = [
     "bigscience/bloom-560m",
     "bigscience/bloom-1b1",
     "bigscience/bloom-1b7",
@@ -9,8 +9,8 @@ PRETRAINED_MODELS = [
     "EleutherAI/pythia-12b",
     "EleutherAI/gpt-j-6B",
 ]
-#replace with bigscience/bloom-7b1 for actual training
-PRETRAINED_MODEL = PRETRAINED_MODELS[0]
+#replace with largest model that can fit on single GPU for actual training (probably bloom1b7)
+DEFAULT_INPUT_MODEL="bigscience/bloom-560m"
 
 TRAINING_DATASETS = [
     "OpenAssistant/oasst1",
@@ -22,7 +22,7 @@ DEFAULT_TRAINING_DATASET = TRAINING_DATASETS[0]
 DEFAULT_SEED=42
 MODEL_DIR="saved_models"
 
-training_params={
+TRAINING_PARAMS={
     "num_epochs":15,
     "start_learning_rate":1e-5,
     "end_learning_rate":1e-6,
@@ -36,8 +36,10 @@ INTRO_BLURB = (
     "Below is an instruction that describes a task. Write a response that appropriately completes the request."
 )
 INSTRUCTION_KEY = "### Instruction:"
+PREV_RESPONSE_KEY = "### Previous response:"
 RESPONSE_KEY = "### Response:"
 END_KEY = "### End"
+RESPONSE_KEY_NL = f"{RESPONSE_KEY}\n"
 
 #(instruction,response) pairs will be repeated for the duration of the conversation
 PROMPT_FORMAT = """{intro}

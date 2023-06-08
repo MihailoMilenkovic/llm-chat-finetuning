@@ -1,21 +1,15 @@
-from datasets import load_dataset
-from transformers import AutoTokenizer
-import numpy as np
-
+import pandas as pd
+from datasets import Dataset,load_dataset
 from consts import *
 
 def append_to_context_above(prev_context,role,message):
   new_context="""
-    {new_key}
-    {new_utterance}
-    {prev_context}
-  """.format(
-      new_key="{new_key}",
-      new_utterance="{new_utterance}",
-      prev_context=prev_context)
+  {new_key}
+  {new_utterance}
+  """
   if role=="assistant":
     new_context=new_context.format(
-      new_key=RESPONSE_KEY,
+      new_key=PREV_RESPONSE_KEY,
       new_utterance=message
     )
   else:
@@ -23,20 +17,16 @@ def append_to_context_above(prev_context,role,message):
       new_key=INSTRUCTION_KEY,
       new_utterance=message
     )
-  return new_context
+  return new_context+prev_context
 
 def append_to_context_below(prev_context,role,message):
   new_context="""
-    {prev_context}
-    {new_key}
-    {new_utterance}
-  """.format(
-      new_key="{new_key}",
-      new_utterance="{new_utterance}",
-      prev_context=prev_context)
+  {new_key}
+  {new_utterance}
+  """
   if role=="assistant":
     new_context=new_context.format(
-      new_key=RESPONSE_KEY,
+      new_key=PREV_RESPONSE_KEY,
       new_utterance=message
     )
   else:
@@ -44,7 +34,7 @@ def append_to_context_below(prev_context,role,message):
       new_key=INSTRUCTION_KEY,
       new_utterance=message
     )
-  return new_context
+  return prev_context+new_context
 
 def filter_top_replies(dataset):
   to_keep=[False for _ in range(len(dataset.index))]
@@ -80,12 +70,16 @@ def filter_top_replies(dataset):
   print("data length after filtering",len(dataset.index))
   return dataset
 
-
-def get_conversation_chains(dataset):
+def load_training_dataset(dataset_name:str):
+  dataset=load_dataset(dataset_name)["train"].to_pandas()
+  dataset=filter_top_replies(dataset)
+  instructions=[]
+  responses=[]
+  contexts=[]
+  texts=[]
   def get_parent_row(row):
     return dataset[dataset["message_id"]==row["parent_id"]].iloc[0]
   assistant_replies=dataset[dataset["role"]=="assistant"]
-  conversation_chains=[]
   for index,reply_row in assistant_replies.iterrows():
     #use only final replies to get full conversation
     if len(reply_row["all_replies"])>0:
@@ -101,38 +95,24 @@ def get_conversation_chains(dataset):
     curr_row=instruction_row
     while curr_row["parent_id"]!=None:
       curr_row=get_parent_row(curr_row)
-      append_to_context_above(context,curr_row["role"],curr_row["text"])
+      context=append_to_context_above(context,curr_row["role"],curr_row["text"])
       curr_row=get_parent_row(curr_row)
-      append_to_context_above(context,curr_row["role"],curr_row["text"])
+      context=append_to_context_above(context,curr_row["role"],curr_row["text"])
     conversation_chain=PROMPT_FORMAT.format(
-        context=context,
-        instruction=instruction,
-        response=response,
-      )
-    conversation_chains.append(conversation_chain)
-  return conversation_chains
+      context=context,
+      instruction=instruction,
+      response=response,
+    )
+    instructions.append(instruction)
+    responses.append(response)
+    contexts.append(context)
+    texts.append(conversation_chain)
 
-
-def get_tokenized_dataset(conversation_chains,tokenizer):
-  conversation_dataset=[{"text":conversation} for conversation in conversation_chains]
-  tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL)
-  def tokenize_function(examples):
-    return tokenizer(examples["text"], padding="max_length", truncation=True)
-  #TODO: check if some sort of end of turn tokens should be added after assistant response or something similar 
-  tokenized_dataset = conversation_dataset.map(tokenize_function, batched=True)
-  return tokenized_dataset
-
-def preprocess_dataset(dataset):
-  dataset=filter_top_replies(dataset)
-  dataset=get_conversation_chains(dataset)
-  dataset=get_tokenized_dataset(dataset)
+  df=pd.DataFrame({
+    'instruction':instructions,
+    'response':responses,
+    'context':contexts,
+    'text':texts
+  })
+  dataset=Dataset.from_pandas(df)
   return dataset
-
-def get_preprocessed_dataset(split="train"):
-  if not split in ["train","val"]:
-    print("dataset only has 'train' and 'val' data")
-    exit(1)
-  dataset = load_dataset(DEFAULT_TRAINING_DATASET)
-  dataset_split = dataset[split].to_pandas()
-  processed_dataset=preprocess_dataset(dataset_split)
-  return processed_dataset

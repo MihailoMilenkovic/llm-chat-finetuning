@@ -1,3 +1,4 @@
+#abandoning training in pytorch in favor of using the huggingface training api
 from transformers import BloomModel
 import torch
 from torch.optim import AdamW
