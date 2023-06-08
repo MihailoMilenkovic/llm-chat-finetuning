@@ -1,16 +1,35 @@
-from transformers import AutoTokenizer, BloomModel
+from typing import List,Tuple
 import torch
 import os
-
 from data_preprocessing import append_to_context_below
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    Pipeline,
+    PreTrainedModel,
+    PreTrainedTokenizer,
+)
 from consts import *
 
-tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL)
-# pretrained_model = BloomModel.from_pretrained(PRETRAINED_MODEL)
-finetuning_checkpoint_path=os.path.join(MODEL_DIR, f'ckpt_epoch_{training_params["num_epochs"]}.pt')
-finetuning_checkpoint_data=torch.load(finetuning_checkpoint_path)
-model=finetuning_checkpoint_data["model"]
-model.eval()
+def load_model_tokenizer_for_generate(
+    pretrained_model_name_or_path: str,
+) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
+    """Loads the model and tokenizer so that it can be used for generating responses.
+
+    Args:
+        pretrained_model_name_or_path (str): name or path for model
+
+    Returns:
+        Tuple[PreTrainedModel, PreTrainedTokenizer]: model and tokenizer
+    """
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path, padding_side="left")
+    model = AutoModelForCausalLM.from_pretrained(
+        pretrained_model_name_or_path, device_map="auto", torch_dtype=torch.bfloat16, trust_remote_code=True
+    )
+    return model, tokenizer
+
+model,tokenizer=load_model_tokenizer_for_generate(DEFAULT_MODEL_PATH)
+
 def remove_trailing_end(response):
   parts=response.rsplit(END_KEY, 1)
   return parts[0] if len(parts)>1 else response

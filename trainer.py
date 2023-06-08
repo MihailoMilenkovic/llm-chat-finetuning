@@ -33,6 +33,7 @@ from peft import get_peft_model, LoraConfig, TaskType
 
 from consts import (
     DEFAULT_INPUT_MODEL,
+    DEFAULT_MODEL_PATH,
     DEFAULT_SEED,
     END_KEY,
     INSTRUCTION_KEY,
@@ -270,7 +271,7 @@ def train(
     logger.info("Done.")
 @click.command()
 @click.option("--input-model", type=str, help="Input model to fine tune", default=DEFAULT_INPUT_MODEL)
-@click.option("--local-output-dir", type=str, help="Write directly to this local path", required=True)
+@click.option("--local-output-dir", type=str, help="Write directly to this local path", default=DEFAULT_MODEL_PATH)
 @click.option("--dbfs-output-dir", type=str, help="Sync data to this path on DBFS")
 @click.option("--epochs", type=int, default=TRAINING_PARAMS["num_epochs"], help="Number of epochs to train for.")
 @click.option("--per-device-train-batch-size", type=int, default=TRAINING_PARAMS["batch_size"], help="Batch size to use for training.")
