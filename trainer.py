@@ -39,7 +39,8 @@ from consts import (
     INSTRUCTION_KEY,
     RESPONSE_KEY_NL,
     DEFAULT_TRAINING_DATASET,
-    TRAINING_PARAMS
+    TRAINING_PARAMS,
+    PEFT
 )
 
 from data_preprocessing import load_training_dataset
@@ -107,16 +108,17 @@ def load_model(
 
 
 def get_model_tokenizer(
-    pretrained_model_name_or_path: str = DEFAULT_INPUT_MODEL, *, gradient_checkpointing: bool = False
+    pretrained_model_name_or_path: str = DEFAULT_INPUT_MODEL, *, gradient_checkpointing: bool = False, peft: bool = False
 ) -> Tuple[AutoModelForCausalLM, PreTrainedTokenizer]:
     tokenizer = load_tokenizer(pretrained_model_name_or_path)
     model = load_model(pretrained_model_name_or_path, gradient_checkpointing=gradient_checkpointing)
     #converting model to parameter efficient version to use with LoRA
     #TODO: add this later
-    # peft_config = LoraConfig(
-    #   task_type=TaskType.SEQ_2_SEQ_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1
-    # )
-    # model=get_peft_model(model,peft_config)
+    if peft:
+        peft_config = LoraConfig(
+        task_type=TaskType.SEQ_2_SEQ_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1
+        )
+        model=get_peft_model(model,peft_config)
     model.resize_token_embeddings(len(tokenizer))
 
     return model, tokenizer
@@ -179,12 +181,13 @@ def train(
     test_size: Union[float, int],
     save_total_limit: int,
     warmup_steps: int,
-    training_dataset: str = DEFAULT_TRAINING_DATASET,
+    training_dataset: str,
+    peft: bool,
 ):
     set_seed(seed)
 
     model, tokenizer = get_model_tokenizer(
-        pretrained_model_name_or_path=input_model, gradient_checkpointing=gradient_checkpointing
+        pretrained_model_name_or_path=input_model, gradient_checkpointing=gradient_checkpointing, peft=peft
     )
 
     # Use the same max length that the model supports.  Fall back to 1024 if the setting can't be found.
@@ -240,7 +243,6 @@ def train(
         save_steps=save_steps,
         save_total_limit=save_total_limit,
         load_best_model_at_end=False,
-        report_to="tensorboard",
         disable_tqdm=True,
         remove_unused_columns=False,
         local_rank=local_rank,
@@ -279,7 +281,7 @@ def train(
 @click.option(
     "--test-size", type=int, default=1000, help="Number of test records for evaluation, or ratio of test records."
 )
-@click.option("--warmup-steps", type=int, default=None, help="Number of steps to warm up to learning rate")
+@click.option("--warmup-steps", type=int, default=50, help="Number of steps to warm up to learning rate")
 @click.option("--logging-steps", type=int, default=10, help="How often to log")
 @click.option("--eval-steps", type=int, default=50, help="How often to run evaluation on test records")
 @click.option("--save-steps", type=int, default=400, help="How often to checkpoint the model")
@@ -291,6 +293,7 @@ def train(
 @click.option("--seed", type=int, default=DEFAULT_SEED, help="Seed to use for training.")
 @click.option("--deepspeed", type=str, default=None, help="Path to deepspeed config file.")
 @click.option("--training-dataset", type=str, default=DEFAULT_TRAINING_DATASET, help="Path to dataset for training")
+@click.option("--peft", type=str, default=PEFT, help="Whether parameter efficient finetuning or full model finetuning is being done")
 @click.option(
     "--gradient-checkpointing/--no-gradient-checkpointing",
     is_flag=True,

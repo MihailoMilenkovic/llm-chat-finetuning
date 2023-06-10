@@ -12,6 +12,8 @@ SUGGESTED_INPUT_MODELS = [
 #replace with largest model that can fit on single GPU for actual training (probably bloom1b7)
 DEFAULT_INPUT_MODEL="bigscience/bloom-560m"
 
+PEFT=False
+
 TRAINING_DATASETS = [
     "OpenAssistant/oasst1",
     "databricks/databricks-dolly-15k"
