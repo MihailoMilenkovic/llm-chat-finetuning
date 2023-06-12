@@ -22,6 +22,8 @@ import numpy as np
 from datasets import Dataset, load_dataset
 from transformers import (
     AutoModelForCausalLM,
+    # BloomModelForCausalLM,
+    GPT2Model,
     AutoTokenizer,
     DataCollatorForLanguageModeling,
     PreTrainedTokenizer,
@@ -101,9 +103,12 @@ def load_model(
     pretrained_model_name_or_path: str = DEFAULT_INPUT_MODEL, *, gradient_checkpointing: bool = False
 ) -> AutoModelForCausalLM:
     logger.info(f"Loading model for {pretrained_model_name_or_path}")
-    model = AutoModelForCausalLM.from_pretrained(
-        pretrained_model_name_or_path, trust_remote_code=True, use_cache=False if gradient_checkpointing else True
-    )
+    #hardcoding bloom model here for now
+    # model=AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path)
+    model=GPT2Model.from_pretrained(pretrained_model_name_or_path)
+    # model = AutoModelForCausalLM.from_pretrained(
+    #     pretrained_model_name_or_path, trust_remote_code=True, use_cache=False if gradient_checkpointing else True
+    # )
     return model
 
 
@@ -116,7 +121,7 @@ def get_model_tokenizer(
     #TODO: add this later
     if peft:
         peft_config = LoraConfig(
-        task_type=TaskType.SEQ_2_SEQ_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1
+        task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1
         )
         model=get_peft_model(model,peft_config)
     model.resize_token_embeddings(len(tokenizer))
