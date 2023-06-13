@@ -11,8 +11,8 @@ SUGGESTED_INPUT_MODELS = [
     "EleutherAI/gpt-j-6B",
 ]
 #replace with largest model that can fit on single GPU for actual training (probably bloom1b7)
-# DEFAULT_INPUT_MODEL="bigscience/bloom-560m"
-DEFAULT_INPUT_MODEL="distilgpt2"
+DEFAULT_INPUT_MODEL="bigscience/bloom-560m"
+# DEFAULT_INPUT_MODEL="distilgpt2"
 
 PEFT=True
 
@@ -33,7 +33,7 @@ TRAINING_PARAMS={
     "beta1":0.9,
     "beta2":0.95,
     "weight_decay":0.1,
-    "batch_size":1 #should be 32 or 64, but can't fit on gpu...
+    "batch_size":64 #should be 32 or 64, but can't fit on gpu...
 }
 
 INTRO_BLURB = (

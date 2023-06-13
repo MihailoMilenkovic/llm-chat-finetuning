@@ -103,12 +103,9 @@ def load_model(
     pretrained_model_name_or_path: str = DEFAULT_INPUT_MODEL, *, gradient_checkpointing: bool = False
 ) -> AutoModelForCausalLM:
     logger.info(f"Loading model for {pretrained_model_name_or_path}")
-    #hardcoding bloom model here for now
-    # model=AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path)
-    model=GPT2Model.from_pretrained(pretrained_model_name_or_path)
-    # model = AutoModelForCausalLM.from_pretrained(
-    #     pretrained_model_name_or_path, trust_remote_code=True, use_cache=False if gradient_checkpointing else True
-    # )
+    model = AutoModelForCausalLM.from_pretrained(
+        pretrained_model_name_or_path, trust_remote_code=True, use_cache=False if gradient_checkpointing else True
+    )
     return model
 
 
