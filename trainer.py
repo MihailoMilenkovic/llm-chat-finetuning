@@ -115,7 +115,6 @@ def get_model_tokenizer(
     tokenizer = load_tokenizer(pretrained_model_name_or_path)
     model = load_model(pretrained_model_name_or_path, gradient_checkpointing=gradient_checkpointing)
     #converting model to parameter efficient version to use with LoRA
-    #TODO: add this later
     if peft:
         peft_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1
@@ -286,7 +285,7 @@ def train(
 @click.option("--per-device-train-batch-size", type=int, default=TRAINING_PARAMS["model_copies_per_device"], help="Batch size to use for training.")
 @click.option("--per-device-eval-batch-size", type=int, default=TRAINING_PARAMS["model_copies_per_device"], help="Batch size to use for evaluation.")
 @click.option(
-    "--test-size", type=int, default=TRAINING_PARAMS["test_percent"], help="Number of test records for evaluation, or ratio of test records."
+    "--test-size", type=int, default=TRAINING_PARAMS["test_size"], help="Number of test records for evaluation, or ratio of test records."
 )
 @click.option("--warmup-steps", type=int, default=50, help="Number of steps to warm up to learning rate")
 @click.option("--logging-steps", type=int, default=10, help="How often to log")
