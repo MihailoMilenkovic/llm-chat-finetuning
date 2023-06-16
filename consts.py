@@ -26,13 +26,13 @@ DEFAULT_TRAINING_DATASET = TRAINING_DATASETS[0]
 
 TRAINING_PARAMS={
     "num_epochs":15,
-    "test_size":200, #only use 200 test examples 
+    "test_size":100, #only use 100 test examples 
     "start_learning_rate":1e-5,
     "end_learning_rate":1e-6,#TODO: check how to set up linear decay to this number instead of default 0 in huggingface trainer
     "beta1":0.9,
     "beta2":0.95,
     "weight_decay":0.1,
-    "batch_size":32, #TODO: check max batch size that can be run on 1 T4 GPU (2 works, 32 seems to not work)
+    "batch_size":64,
     "model_copies_per_device":1,
 }
 
