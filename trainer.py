@@ -293,7 +293,7 @@ def train(
 @click.option("--eval-steps", type=int, default=50, help="How often to run evaluation on test records")
 @click.option("--save-steps", type=int, default=400, help="How often to checkpoint the model")
 @click.option("--save-total-limit", type=int, default=10, help="Maximum number of checkpoints to keep on disk")
-@click.option("--learning_rate", type=float, default=TRAINING_PARAMS["start_learning_rate"], help="Learning rate to use at start of training.")
+@click.option("--learning-rate", type=float, default=TRAINING_PARAMS["start_learning_rate"], help="Learning rate to use at start of training.")
 @click.option("--weight-decay", type=float, default=TRAINING_PARAMS["weight_decay"], help="Weight decay parameter in AdamW?.")
 @click.option("--beta1", type=float, default=TRAINING_PARAMS["beta1"], help="beta1 parameter in AdamW.")
 @click.option("--beta2", type=float, default=TRAINING_PARAMS["beta2"], help="beta2 parameter in AdamW.")
@@ -316,7 +316,6 @@ def train(
 @click.option("--bf16", type=bool, default=None, help="Whether to use bf16 (preferred on A100's).")
 def main(**kwargs):
     train(**kwargs)
-    print("training completed")
 
 if __name__ == "__main__":
     logging.basicConfig(
