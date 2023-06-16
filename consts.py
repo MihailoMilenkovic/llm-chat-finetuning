@@ -10,9 +10,8 @@ SUGGESTED_INPUT_MODELS = [
     "EleutherAI/pythia-12b",
     "EleutherAI/gpt-j-6B",
 ]
-#replace with largest model that can fit on single GPU for actual training (probably bloom1b7)
+#TODO: replace with largest model that can fit on single GPU for actual training (bloom 7b1)
 DEFAULT_INPUT_MODEL="bigscience/bloom-560m"
-# DEFAULT_INPUT_MODEL="distilgpt2"
 
 PEFT=True
 
@@ -23,18 +22,22 @@ TRAINING_DATASETS = [
 
 DEFAULT_TRAINING_DATASET = TRAINING_DATASETS[0]
 
-DEFAULT_SEED=42
-DEFAULT_MODEL_PATH="oasst1-bloom-560m-finetuned"
+
 
 TRAINING_PARAMS={
-    "num_epochs":15,
+    "num_epochs":1, #TODO: replace with recommended number of epochs for full training
+    "test_percent":0.05, #TODO: increase train percent for final run
     "start_learning_rate":1e-5,
-    "end_learning_rate":1e-6,
+    "end_learning_rate":1e-6,#TODO: check how to set up linear decay to this number instead of default 0 in huggingface trainer
     "beta1":0.9,
     "beta2":0.95,
     "weight_decay":0.1,
-    "batch_size":64 #should be 32 or 64, but can't fit on gpu...
+    "batch_size":32, #TODO: check max batch size that can be run on 1 T4 GPU (2 works, 32 seems to not work)
+    "model_copies_per_device":1
 }
+
+DEFAULT_SEED=42
+DEFAULT_MODEL_PATH=f"{DEFAULT_TRAINING_DATASET.rsplit('/',1)[-1]}-{DEFAULT_INPUT_MODEL.rsplit('/',1)[-1]}-batch_size_{TRAINING_PARAMS['batch_size']}-{TRAINING_PARAMS['num_epochs']}_epochs"
 
 INTRO_BLURB = (
     "Below is an instruction that describes a task. Write a response that appropriately completes the request."

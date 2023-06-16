@@ -166,6 +166,7 @@ def train(
     local_output_dir: str,
     dbfs_output_dir: str,
     epochs: int,
+    gradient_accumulation_steps: int,
     per_device_train_batch_size: int,
     per_device_eval_batch_size: int,
     learning_rate: float,
@@ -225,6 +226,7 @@ def train(
 
     training_args = TrainingArguments(
         output_dir=local_output_dir,
+        gradient_accumulation_steps=gradient_accumulation_steps,
         per_device_train_batch_size=per_device_train_batch_size,
         per_device_eval_batch_size=per_device_eval_batch_size,
         fp16=fp16,
@@ -278,10 +280,13 @@ def train(
 @click.option("--local-output-dir", type=str, help="Write directly to this local path", default=DEFAULT_MODEL_PATH)
 @click.option("--dbfs-output-dir", type=str, help="Sync data to this path on DBFS")
 @click.option("--epochs", type=int, default=TRAINING_PARAMS["num_epochs"], help="Number of epochs to train for.")
-@click.option("--per-device-train-batch-size", type=int, default=TRAINING_PARAMS["batch_size"], help="Batch size to use for training.")
-@click.option("--per-device-eval-batch-size", type=int, default=TRAINING_PARAMS["batch_size"], help="Batch size to use for evaluation.")
+#setting gradient accumulation steps to be batch_size/copies_per_device, makes us do updates after batch_size different runs
+#this works with one device! should set CUDA_VISIBLE_DEVICES=0 to use only first device
+@click.option("--gradient_accumulation_steps", type=int, default=TRAINING_PARAMS["batch_size"]/TRAINING_PARAMS["model_copies_per_device"], help="Number of steps to do before updating gradients")
+@click.option("--per-device-train-batch-size", type=int, default=TRAINING_PARAMS["model_copies_per_device"], help="Batch size to use for training.")
+@click.option("--per-device-eval-batch-size", type=int, default=TRAINING_PARAMS["model_copies_per_device"], help="Batch size to use for evaluation.")
 @click.option(
-    "--test-size", type=int, default=1000, help="Number of test records for evaluation, or ratio of test records."
+    "--test-size", type=int, default=TRAINING_PARAMS["test_percent"], help="Number of test records for evaluation, or ratio of test records."
 )
 @click.option("--warmup-steps", type=int, default=50, help="Number of steps to warm up to learning rate")
 @click.option("--logging-steps", type=int, default=10, help="How often to log")
@@ -311,6 +316,7 @@ def train(
 @click.option("--bf16", type=bool, default=None, help="Whether to use bf16 (preferred on A100's).")
 def main(**kwargs):
     train(**kwargs)
+    print("training completed")
 
 if __name__ == "__main__":
     logging.basicConfig(
