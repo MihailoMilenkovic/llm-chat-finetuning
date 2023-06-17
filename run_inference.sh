@@ -5,5 +5,4 @@
 #SBATCH --partition=cuda
 #SBATCH --time=1:00:00
 
-export CUDA_VISIBLE_DEVICES=0
 python generate.py

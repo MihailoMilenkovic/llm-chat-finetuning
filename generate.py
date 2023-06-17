@@ -68,7 +68,7 @@ def get_special_token_id(tokenizer: PreTrainedTokenizer, key: str) -> int:
 
 class InstructionTextGenerationPipeline(Pipeline):
     def __init__(
-        self, *args, do_sample: bool = True, max_new_tokens: int = 256, top_p: float = 0.92, top_k: int = 0, **kwargs
+        self, *args, do_sample: bool = True, max_new_tokens: int = 512, top_p: float = 1, top_k: int = 1, **kwargs
     ):
         """Initialize the pipeline
 
@@ -245,13 +245,24 @@ def generate_response(
 
 
 if __name__=="__main__":
-  instruction="Write a function that adds two numbers in Python"
+  instruction="Write a symphony concert review, discussing the orchestra's performance and overall audience experience."
   
-  pretrained_model,tokenizer=load_model_tokenizer_for_generate(DEFAULT_INPUT_MODEL, None)
-  response=generate_response(instruction,model=pretrained_model,tokenizer=tokenizer)
-  print("pretrained response is:",response)
-  
-  tuned_model,tokenizer=load_model_tokenizer_for_generate(DEFAULT_INPUT_MODEL,DEFAULT_MODEL_PATH)
-  response=generate_response(instruction,model=tuned_model,tokenizer=tokenizer)
-  print("finetuned response is:",response)
+  print("INSTRUCTION:",instruction)
+  print("-"*50)
+
+  lora_weights_to_try=[
+    None,
+    # f"{DEFAULT_MODEL_PATH}/checkpoint-400",
+    # f"{DEFAULT_MODEL_PATH}/checkpoint-800",
+    # f"{DEFAULT_MODEL_PATH}/checkpoint-1200",
+    f"{DEFAULT_MODEL_PATH}/checkpoint-1600",
+    DEFAULT_MODEL_PATH
+  ]
+  for weight in lora_weights_to_try:
+    # tuned_model,tokenizer=load_model_tokenizer_for_generate(DEFAULT_INPUT_MODEL,DEFAULT_MODEL_PATH)
+    tuned_model,tokenizer=load_model_tokenizer_for_generate(DEFAULT_INPUT_MODEL,weight)
+    response=generate_response(instruction,model=tuned_model,tokenizer=tokenizer)
+    print(f"RESPONSE FROM {weight}:")
+    print("-"*50)
+    print(response)
   
