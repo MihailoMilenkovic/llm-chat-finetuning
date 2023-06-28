@@ -68,7 +68,7 @@ def get_special_token_id(tokenizer: PreTrainedTokenizer, key: str) -> int:
 
 class InstructionTextGenerationPipeline(Pipeline):
     def __init__(
-        self, *args, do_sample: bool = True, max_new_tokens: int = 512, top_p: float = 1, top_k: int = 1, **kwargs
+        self, *args, do_sample: bool = True, max_new_tokens: int = 512, top_p: float = 0.92, top_k: int = 0, **kwargs
     ):
         """Initialize the pipeline
 
@@ -245,7 +245,7 @@ def generate_response(
 
 
 if __name__=="__main__":
-  instruction="Write a symphony concert review, discussing the orchestra's performance and overall audience experience."
+  instruction="Can you say what the capital of Serbia is?"
   
   print("INSTRUCTION:",instruction)
   print("-"*50)
